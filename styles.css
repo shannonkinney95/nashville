@@ -797,6 +797,140 @@ img {
 }
 
 /* ============================================
+   RSVP FORM
+   ============================================ */
+.rsvp {
+  background: var(--bg-dark);
+  color: #fff;
+}
+
+.rsvp .section-label {
+  color: rgba(255, 255, 255, 0.35);
+}
+
+.rsvp .section-title {
+  color: #fff;
+}
+
+.rsvp-intro {
+  font-family: var(--font-display);
+  font-size: 20px;
+  font-weight: 300;
+  color: rgba(255, 255, 255, 0.5);
+  line-height: 1.7;
+  max-width: 480px;
+  margin-bottom: 48px;
+}
+
+.rsvp-form {
+  max-width: 640px;
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.form-group {
+  margin-bottom: 20px;
+}
+
+.form-group label {
+  display: block;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.4);
+  margin-bottom: 8px;
+}
+
+.form-group input,
+.form-group textarea {
+  width: 100%;
+  font-family: var(--font-body);
+  font-size: 15px;
+  font-weight: 300;
+  color: #fff;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: var(--radius-sm);
+  padding: 14px 16px;
+  transition: border-color 0.3s, background 0.3s;
+  outline: none;
+}
+
+.form-group input::placeholder,
+.form-group textarea::placeholder {
+  color: rgba(255, 255, 255, 0.2);
+}
+
+.form-group input:focus,
+.form-group textarea:focus {
+  border-color: var(--gold);
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.form-group textarea {
+  resize: vertical;
+  min-height: 60px;
+}
+
+.form-submit {
+  display: inline-block;
+  font-family: var(--font-body);
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 2.5px;
+  text-transform: uppercase;
+  color: var(--bg-dark);
+  background: var(--gold);
+  border: none;
+  border-radius: var(--radius-sm);
+  padding: 16px 40px;
+  cursor: pointer;
+  transition: all 0.3s;
+  margin-top: 8px;
+}
+
+.form-submit:hover {
+  background: #d4b87a;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(201, 169, 110, 0.25);
+}
+
+.form-submit:active {
+  transform: translateY(0);
+}
+
+/* Success state */
+.form-success {
+  text-align: center;
+  padding: 60px 0;
+}
+
+.success-title {
+  font-family: var(--font-accent);
+  font-size: 36px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin-bottom: 12px;
+}
+
+.success-text {
+  font-size: 15px;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+@media (max-width: 768px) {
+  .form-row {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ============================================
    FOOTER
    ============================================ */
 .footer {

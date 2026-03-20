@@ -52,6 +52,7 @@ document.addEventListener('DOMContentLoaded', () => {
     ...document.querySelectorAll('.house-details'),
     ...document.querySelectorAll('.color-palette'),
     ...document.querySelectorAll('.total-card'),
+    ...document.querySelectorAll('.rsvp-form'),
   ];
 
   revealTargets.forEach(el => el.classList.add('reveal'));
@@ -84,5 +85,37 @@ document.addEventListener('DOMContentLoaded', () => {
       heroBg.style.transform = `translateY(${window.scrollY * 0.25}px) scale(1.05)`;
     }
   }, { passive: true });
+
+  // ---- RSVP form AJAX submission ----
+  const form = document.querySelector('.rsvp-form');
+  const successEl = document.getElementById('form-success');
+
+  if (form) {
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const btn = form.querySelector('.form-submit');
+      btn.textContent = 'Sending...';
+      btn.disabled = true;
+
+      try {
+        const res = await fetch(form.action, {
+          method: 'POST',
+          body: new FormData(form),
+          headers: { 'Accept': 'application/json' },
+        });
+
+        if (res.ok) {
+          form.style.display = 'none';
+          successEl.style.display = 'block';
+        } else {
+          btn.textContent = 'Something went wrong — try again';
+          btn.disabled = false;
+        }
+      } catch {
+        btn.textContent = 'Something went wrong — try again';
+        btn.disabled = false;
+      }
+    });
+  }
 
 });
