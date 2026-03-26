@@ -300,6 +300,24 @@ img {
   line-height: 1.7;
 }
 
+.house-address {
+  margin-top: 12px;
+  font-size: 13px;
+  letter-spacing: 0.5px;
+  color: var(--text-light);
+}
+
+.house-address a {
+  color: var(--gold);
+  text-decoration: none;
+  border-bottom: 1px solid rgba(201, 169, 110, 0.3);
+  transition: border-color 0.3s;
+}
+
+.house-address a:hover {
+  border-color: var(--gold);
+}
+
 /* Photo Grid */
 .photo-grid {
   display: grid;
