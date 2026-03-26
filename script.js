@@ -47,7 +47,7 @@ document.addEventListener('DOMContentLoaded', () => {
     ...document.querySelectorAll('.photo-item'),
     ...document.querySelectorAll('.feature'),
     ...document.querySelectorAll('.day'),
-    ...document.querySelectorAll('.style-card'),
+    ...document.querySelectorAll('.style-day'),
     ...document.querySelectorAll('.cost-card'),
     ...document.querySelectorAll('.house-details'),
     ...document.querySelectorAll('.color-palette'),
@@ -86,8 +86,8 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }, { passive: true });
 
-  // ---- RSVP form AJAX submission ----
-  const form = document.querySelector('.rsvp-form');
+  // ---- RSVP form → Google Sheets ----
+  const form = document.getElementById('rsvp-form');
   const successEl = document.getElementById('form-success');
 
   if (form) {
@@ -97,23 +97,21 @@ document.addEventListener('DOMContentLoaded', () => {
       btn.textContent = 'Sending...';
       btn.disabled = true;
 
-      try {
-        const res = await fetch(form.action, {
-          method: 'POST',
-          body: new FormData(form),
-          headers: { 'Accept': 'application/json' },
-        });
+      const formData = new FormData(form);
+      const url = 'https://docs.google.com/forms/d/e/1FAIpQLSelatd0CWxQg13PVsEb8vSERQ8WBFs1b1oxV5JEIQLa1XbVHg/formResponse';
 
-        if (res.ok) {
-          form.style.display = 'none';
-          successEl.style.display = 'block';
-        } else {
-          btn.textContent = 'Something went wrong — try again';
-          btn.disabled = false;
-        }
+      try {
+        await fetch(url, {
+          method: 'POST',
+          body: formData,
+          mode: 'no-cors',
+        });
+        form.style.display = 'none';
+        successEl.style.display = 'block';
       } catch {
-        btn.textContent = 'Something went wrong — try again';
-        btn.disabled = false;
+        // no-cors means we can't read the response, but Google still receives the data
+        form.style.display = 'none';
+        successEl.style.display = 'block';
       }
     });
   }

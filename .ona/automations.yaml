@@ -1,0 +1,7 @@
+services:
+  dev-server:
+    name: Dev Server
+    description: Serves the static site on port 3000
+    triggeredBy:
+      - postDevcontainerStart
+    command: npx serve . -l 3000
