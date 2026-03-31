@@ -1113,6 +1113,196 @@ img {
   padding: 5px 14px;
 }
 
+/* Edit button on cards */
+.girl-card {
+  position: relative;
+  cursor: grab;
+}
+
+.girl-card:active {
+  cursor: grabbing;
+}
+
+.card-edit-btn {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.05);
+  color: rgba(255, 255, 255, 0.3);
+  font-size: 13px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.25s;
+  opacity: 0;
+  padding: 0;
+}
+
+.girl-card:hover .card-edit-btn {
+  opacity: 1;
+}
+
+.card-edit-btn:hover {
+  background: rgba(201, 169, 110, 0.15);
+  border-color: rgba(201, 169, 110, 0.3);
+  color: var(--gold);
+}
+
+.card-drag-hint {
+  font-family: var(--font-body);
+  font-size: 10px;
+  color: rgba(255, 255, 255, 0.15);
+  margin-top: 10px;
+  opacity: 0;
+  transition: opacity 0.25s;
+}
+
+.girl-card:hover .card-drag-hint {
+  opacity: 1;
+}
+
+/* Drag states */
+.girl-card.dragging {
+  opacity: 0.4;
+  transform: scale(0.95);
+}
+
+.girl-card.drag-over {
+  border-color: var(--gold);
+  background: rgba(201, 169, 110, 0.08);
+  box-shadow: 0 0 0 2px rgba(201, 169, 110, 0.15);
+}
+
+/* Edit mode */
+.girl-card-editing {
+  padding: 20px !important;
+  text-align: left !important;
+}
+
+.edit-form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.edit-photo-upload {
+  position: relative;
+  width: 64px;
+  height: 64px;
+  margin: 0 auto 4px;
+  cursor: pointer;
+}
+
+.edit-photo-upload input[type="file"] {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  cursor: pointer;
+  z-index: 2;
+}
+
+.edit-photo-preview {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: rgba(201, 169, 110, 0.1);
+  border: 2px dashed rgba(201, 169, 110, 0.25);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  transition: border-color 0.25s;
+}
+
+.edit-photo-upload:hover .edit-photo-preview {
+  border-color: var(--gold);
+}
+
+.edit-photo-preview img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
+}
+
+.edit-input {
+  width: 100%;
+  font-family: var(--font-body);
+  font-size: 13px;
+  font-weight: 300;
+  color: #fff;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 6px;
+  padding: 10px 12px;
+  outline: none;
+  transition: border-color 0.25s;
+}
+
+.edit-input:focus {
+  border-color: var(--gold);
+}
+
+.edit-input::placeholder {
+  color: rgba(255, 255, 255, 0.2);
+}
+
+.edit-actions {
+  display: flex;
+  gap: 6px;
+  margin-top: 4px;
+}
+
+.edit-save,
+.edit-cancel,
+.edit-delete {
+  flex: 1;
+  font-family: var(--font-body);
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  border: none;
+  border-radius: 6px;
+  padding: 8px 0;
+  cursor: pointer;
+  transition: all 0.25s;
+}
+
+.edit-save {
+  background: var(--gold);
+  color: var(--bg-dark);
+}
+
+.edit-save:hover {
+  background: #d4b87a;
+}
+
+.edit-cancel {
+  background: rgba(255, 255, 255, 0.08);
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.edit-cancel:hover {
+  background: rgba(255, 255, 255, 0.12);
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.edit-delete {
+  background: rgba(255, 80, 80, 0.1);
+  color: rgba(255, 100, 100, 0.7);
+}
+
+.edit-delete:hover {
+  background: rgba(255, 80, 80, 0.2);
+  color: rgba(255, 100, 100, 0.9);
+}
+
 /* ============================================
    RSVP FORM
    ============================================ */

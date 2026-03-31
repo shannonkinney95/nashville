@@ -261,6 +261,136 @@ document.addEventListener('DOMContentLoaded', () => {
     legend.innerHTML = legendHTML;
   }
 
+  // ---- Drag and drop state ----
+  let dragSrcIndex = null;
+
+  function handleDragStart(e) {
+    const card = e.target.closest('.girl-card');
+    if (!card) return;
+    dragSrcIndex = parseInt(card.dataset.index);
+    card.classList.add('dragging');
+    e.dataTransfer.effectAllowed = 'move';
+    e.dataTransfer.setData('text/plain', dragSrcIndex);
+  }
+
+  function handleDragOver(e) {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+    const card = e.target.closest('.girl-card');
+    if (card) card.classList.add('drag-over');
+  }
+
+  function handleDragLeave(e) {
+    const card = e.target.closest('.girl-card');
+    if (card) card.classList.remove('drag-over');
+  }
+
+  function handleDrop(e) {
+    e.preventDefault();
+    const card = e.target.closest('.girl-card');
+    if (!card) return;
+    card.classList.remove('drag-over');
+    const dropIndex = parseInt(card.dataset.index);
+    if (dragSrcIndex === null || dragSrcIndex === dropIndex) return;
+
+    const travelers = getTravelers();
+    const [moved] = travelers.splice(dragSrcIndex, 1);
+    travelers.splice(dropIndex, 0, moved);
+    localStorage.setItem('nashBashTravelers', JSON.stringify(travelers));
+    renderGirlsGrid();
+  }
+
+  function handleDragEnd(e) {
+    dragSrcIndex = null;
+    document.querySelectorAll('.girl-card').forEach(c => {
+      c.classList.remove('dragging', 'drag-over');
+    });
+  }
+
+  // ---- Edit card ----
+  function startEdit(index) {
+    const travelers = getTravelers();
+    const t = travelers[index];
+    if (!t) return;
+
+    const card = document.querySelector(`.girl-card[data-index="${index}"]`);
+    if (!card) return;
+
+    const photoSrc = t.photo || '';
+    const previewHTML = photoSrc
+      ? `<img src="${photoSrc}" alt="Preview" />`
+      : `<span class="photo-upload-icon">+</span>`;
+
+    card.classList.add('girl-card-editing');
+    card.setAttribute('draggable', 'false');
+    card.innerHTML = `
+      <div class="edit-form">
+        <div class="edit-photo-upload">
+          <input type="file" class="edit-photo-input" accept="image/*" />
+          <div class="edit-photo-preview">${previewHTML}</div>
+        </div>
+        <input type="text" class="edit-input" value="${t.name}" placeholder="Name" data-field="name" />
+        <input type="text" class="edit-input" value="${t.city || ''}" placeholder="City, State" data-field="city" />
+        <input type="text" class="edit-input" value="${t.connection || ''}" placeholder="How you know Shannon" data-field="connection" />
+        <div class="edit-actions">
+          <button class="edit-save" data-index="${index}">Save</button>
+          <button class="edit-cancel" data-index="${index}">Cancel</button>
+          <button class="edit-delete" data-index="${index}">Remove</button>
+        </div>
+      </div>
+    `;
+
+    // Photo change handler
+    const fileInput = card.querySelector('.edit-photo-input');
+    const preview = card.querySelector('.edit-photo-preview');
+    fileInput.addEventListener('change', () => {
+      const file = fileInput.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = (ev) => {
+        preview.innerHTML = `<img src="${ev.target.result}" alt="Preview" />`;
+        preview.dataset.newPhoto = ev.target.result;
+      };
+      reader.readAsDataURL(file);
+    });
+
+    // Save
+    card.querySelector('.edit-save').addEventListener('click', async () => {
+      const inputs = card.querySelectorAll('.edit-input');
+      const vals = {};
+      inputs.forEach(inp => { vals[inp.dataset.field] = inp.value.trim(); });
+
+      const travelers = getTravelers();
+      travelers[index].name = vals.name || travelers[index].name;
+      travelers[index].city = vals.city || '';
+      travelers[index].connection = vals.connection || '';
+
+      // Handle new photo
+      const newPhotoData = preview.dataset.newPhoto;
+      if (newPhotoData) {
+        travelers[index].photo = await resizeImage(newPhotoData, 150);
+      }
+
+      localStorage.setItem('nashBashTravelers', JSON.stringify(travelers));
+      renderGirlsGrid();
+      renderFlightMap();
+    });
+
+    // Cancel
+    card.querySelector('.edit-cancel').addEventListener('click', () => {
+      renderGirlsGrid();
+    });
+
+    // Delete
+    card.querySelector('.edit-delete').addEventListener('click', () => {
+      const travelers = getTravelers();
+      travelers.splice(index, 1);
+      localStorage.setItem('nashBashTravelers', JSON.stringify(travelers));
+      renderGirlsGrid();
+      renderFlightMap();
+    });
+  }
+
   function renderGirlsGrid() {
     const grid = document.getElementById('girls-grid');
     if (!grid) return;
@@ -272,7 +402,7 @@ document.addEventListener('DOMContentLoaded', () => {
       return;
     }
 
-    grid.innerHTML = travelers.map(t => {
+    grid.innerHTML = travelers.map((t, i) => {
       const initial = t.name.charAt(0).toUpperCase();
       const fromLine = t.city ? `From ${t.city}` : '';
       const connectionBadge = t.connection
@@ -283,14 +413,33 @@ document.addEventListener('DOMContentLoaded', () => {
         : `<div class="girl-photo-placeholder">${initial}</div>`;
 
       return `
-        <div class="girl-card">
+        <div class="girl-card" data-index="${i}" draggable="true">
+          <button class="card-edit-btn" data-index="${i}" title="Edit">✎</button>
           ${photoEl}
           <p class="girl-name">${t.name}</p>
           ${fromLine ? `<p class="girl-from">${fromLine}</p>` : ''}
           ${connectionBadge}
+          <p class="card-drag-hint">Hold to drag</p>
         </div>
       `;
     }).join('');
+
+    // Attach edit handlers
+    grid.querySelectorAll('.card-edit-btn').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        startEdit(parseInt(btn.dataset.index));
+      });
+    });
+
+    // Attach drag handlers
+    grid.querySelectorAll('.girl-card').forEach(card => {
+      card.addEventListener('dragstart', handleDragStart);
+      card.addEventListener('dragover', handleDragOver);
+      card.addEventListener('dragleave', handleDragLeave);
+      card.addEventListener('drop', handleDrop);
+      card.addEventListener('dragend', handleDragEnd);
+    });
   }
 
   // Render on load
