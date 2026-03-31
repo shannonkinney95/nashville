@@ -166,12 +166,12 @@ document.addEventListener('DOMContentLoaded', () => {
     } catch { return []; }
   }
 
-  function saveTraveler(name, city, connection) {
+  function saveTraveler(name, city, connection, photo) {
     const travelers = getTravelers();
     // Avoid duplicates by name
     const existing = travelers.findIndex(t => t.name.toLowerCase() === name.toLowerCase());
     if (existing >= 0) travelers.splice(existing, 1);
-    travelers.push({ name, city, connection: connection || '' });
+    travelers.push({ name, city, connection: connection || '', photo: photo || '' });
     localStorage.setItem('nashBashTravelers', JSON.stringify(travelers));
   }
 
@@ -277,10 +277,13 @@ document.addEventListener('DOMContentLoaded', () => {
       const connectionBadge = t.connection
         ? `<span class="girl-connection">${t.connection}</span>`
         : '';
+      const photoEl = t.photo
+        ? `<img class="girl-photo" src="${t.photo}" alt="${t.name}" />`
+        : `<div class="girl-photo-placeholder">${initial}</div>`;
 
       return `
         <div class="girl-card">
-          <div class="girl-photo-placeholder">${initial}</div>
+          ${photoEl}
           <p class="girl-name">${t.name}</p>
           ${fromLine ? `<p class="girl-from">${fromLine}</p>` : ''}
           ${connectionBadge}
@@ -292,6 +295,43 @@ document.addEventListener('DOMContentLoaded', () => {
   // Render on load
   renderFlightMap();
   renderGirlsGrid();
+
+  // ---- Photo upload preview ----
+  const photoInput = document.getElementById('photo');
+  const photoPreview = document.getElementById('photo-preview');
+
+  if (photoInput && photoPreview) {
+    photoInput.addEventListener('change', () => {
+      const file = photoInput.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        photoPreview.innerHTML = `<img src="${e.target.result}" alt="Preview" />`;
+        document.querySelector('.photo-upload-label').textContent = file.name;
+      };
+      reader.readAsDataURL(file);
+    });
+  }
+
+  // Helper: resize image to a small thumbnail before storing
+  function resizeImage(dataUrl, maxSize) {
+    return new Promise((resolve) => {
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        let w = img.width;
+        let h = img.height;
+        if (w > h) { h = (maxSize / w) * h; w = maxSize; }
+        else { w = (maxSize / h) * w; h = maxSize; }
+        canvas.width = w;
+        canvas.height = h;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, w, h);
+        resolve(canvas.toDataURL('image/jpeg', 0.7));
+      };
+      img.src = dataUrl;
+    });
+  }
 
   // ---- RSVP form → Google Sheets ----
   const form = document.getElementById('rsvp-form');
@@ -308,8 +348,20 @@ document.addEventListener('DOMContentLoaded', () => {
       const nameVal = document.getElementById('name').value.trim();
       const cityVal = document.getElementById('coming-from').value.trim();
       const connectionVal = document.getElementById('connection').value;
+      const photoFile = document.getElementById('photo').files[0];
+
+      let photoData = '';
+      if (photoFile) {
+        const rawData = await new Promise((resolve) => {
+          const r = new FileReader();
+          r.onload = (ev) => resolve(ev.target.result);
+          r.readAsDataURL(photoFile);
+        });
+        photoData = await resizeImage(rawData, 150);
+      }
+
       if (nameVal) {
-        saveTraveler(nameVal, cityVal, connectionVal);
+        saveTraveler(nameVal, cityVal, connectionVal, photoData);
         renderFlightMap();
         renderGirlsGrid();
       }
