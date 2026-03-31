@@ -20,6 +20,7 @@
         <a href="#agenda">Agenda</a>
         <a href="#style">Style</a>
         <a href="#costs">Costs</a>
+        <a href="#flight-map">Map</a>
         <a href="#rsvp">RSVP</a>
       </div>
       <button class="nav-toggle" aria-label="Toggle menu">
@@ -436,10 +437,136 @@
     </div>
   </section>
 
+  <!-- Flight Map -->
+  <section id="flight-map" class="section flight-map">
+    <div class="container">
+      <div class="section-label">05 — The Crew</div>
+      <h2 class="section-title">Where Everyone's Flying In From</h2>
+      <p class="map-intro">All roads (and flights) lead to Nashville.</p>
+
+      <div class="map-wrapper">
+        <svg id="us-map" viewBox="80 50 860 500" preserveAspectRatio="xMidYMid meet">
+          <!-- US state outlines rendered as simplified paths -->
+          <g class="states" fill="rgba(255,255,255,0.04)" stroke="rgba(255,255,255,0.1)" stroke-width="0.8">
+            <!-- Washington -->
+            <path d="M125,85 L175,80 L185,82 L195,95 L190,110 L175,115 L155,118 L130,115 L120,100 Z"/>
+            <!-- Oregon -->
+            <path d="M120,100 L130,115 L155,118 L175,115 L178,135 L170,155 L140,160 L115,150 L110,125 Z"/>
+            <!-- California -->
+            <path d="M110,125 L115,150 L140,160 L145,180 L140,210 L130,240 L120,260 L105,265 L95,250 L90,220 L95,185 L100,155 Z"/>
+            <!-- Nevada -->
+            <path d="M140,160 L170,155 L175,175 L170,210 L155,240 L130,240 L140,210 L145,180 Z"/>
+            <!-- Idaho -->
+            <path d="M175,115 L190,110 L210,115 L215,140 L210,160 L195,165 L178,135 Z"/>
+            <!-- Montana -->
+            <path d="M195,95 L210,90 L260,85 L300,88 L305,110 L290,115 L260,118 L230,120 L210,115 Z"/>
+            <!-- Wyoming -->
+            <path d="M210,115 L260,118 L290,115 L295,140 L290,160 L255,162 L220,160 L215,140 Z"/>
+            <!-- Utah -->
+            <path d="M178,135 L195,165 L210,160 L220,160 L225,190 L210,210 L185,210 L170,210 L175,175 Z"/>
+            <!-- Colorado -->
+            <path d="M220,160 L255,162 L290,160 L295,190 L290,210 L255,212 L225,210 L225,190 Z"/>
+            <!-- Arizona -->
+            <path d="M130,240 L155,240 L170,210 L185,210 L190,245 L175,275 L145,280 L120,260 Z"/>
+            <!-- New Mexico -->
+            <path d="M185,210 L210,210 L225,210 L255,212 L260,245 L255,275 L220,280 L190,275 L190,245 Z"/>
+            <!-- North Dakota -->
+            <path d="M300,88 L350,85 L390,88 L392,110 L355,112 L305,110 Z"/>
+            <!-- South Dakota -->
+            <path d="M305,110 L355,112 L392,110 L395,138 L360,140 L310,138 L295,140 Z"/>
+            <!-- Nebraska -->
+            <path d="M295,140 L310,138 L360,140 L395,138 L400,162 L370,168 L330,168 L290,160 Z"/>
+            <!-- Kansas -->
+            <path d="M290,160 L330,168 L370,168 L400,162 L405,195 L370,198 L330,198 L295,190 Z"/>
+            <!-- Oklahoma -->
+            <path d="M295,190 L330,198 L370,198 L405,195 L410,220 L395,230 L350,232 L310,228 L290,210 Z"/>
+            <!-- Texas -->
+            <path d="M260,245 L290,210 L310,228 L350,232 L395,230 L400,250 L395,280 L380,310 L360,335 L340,345 L310,340 L285,325 L270,305 L255,275 Z"/>
+            <!-- Minnesota -->
+            <path d="M390,88 L430,82 L450,85 L455,110 L450,135 L420,138 L392,110 Z"/>
+            <!-- Iowa -->
+            <path d="M395,138 L420,138 L450,135 L460,155 L455,172 L425,175 L400,162 Z"/>
+            <!-- Missouri -->
+            <path d="M400,162 L425,175 L455,172 L470,180 L475,205 L460,218 L435,220 L410,220 L405,195 Z"/>
+            <!-- Arkansas -->
+            <path d="M410,220 L435,220 L460,218 L465,245 L455,265 L430,268 L410,260 L395,230 Z"/>
+            <!-- Louisiana -->
+            <path d="M395,230 L410,260 L430,268 L445,280 L450,300 L440,310 L420,305 L400,310 L385,300 L380,310 L395,280 L400,250 Z"/>
+            <!-- Wisconsin -->
+            <path d="M450,85 L480,80 L505,88 L510,110 L505,130 L485,138 L460,135 L455,110 Z"/>
+            <!-- Michigan -->
+            <path d="M505,88 L530,78 L555,82 L560,95 L550,105 L535,100 L520,105 L510,110 Z M510,110 L520,105 L535,100 L545,110 L550,130 L540,145 L520,148 L505,130 Z"/>
+            <!-- Illinois -->
+            <path d="M460,135 L485,138 L495,155 L500,175 L495,200 L480,210 L470,180 L455,172 L460,155 Z"/>
+            <!-- Indiana -->
+            <path d="M495,155 L520,148 L530,155 L535,180 L525,200 L510,205 L495,200 L500,175 Z"/>
+            <!-- Ohio -->
+            <path d="M530,155 L540,145 L550,130 L575,128 L590,135 L595,160 L580,175 L560,180 L535,180 Z"/>
+            <!-- Kentucky -->
+            <path d="M480,210 L495,200 L510,205 L525,200 L535,180 L560,180 L580,175 L590,185 L575,200 L550,210 L520,218 L490,220 Z"/>
+            <!-- Tennessee -->
+            <path d="M490,220 L520,218 L550,210 L575,200 L590,185 L620,190 L640,195 L640,215 L610,220 L560,225 L510,228 Z"/>
+            <!-- Mississippi -->
+            <path d="M455,265 L465,245 L460,218 L475,205 L490,220 L510,228 L505,255 L495,275 L480,290 L465,295 L455,280 Z"/>
+            <!-- Alabama -->
+            <path d="M510,228 L540,230 L555,235 L560,265 L555,290 L540,300 L520,295 L505,285 L495,275 L505,255 Z"/>
+            <!-- Georgia -->
+            <path d="M555,235 L575,230 L595,235 L605,260 L600,285 L585,300 L565,305 L555,290 L560,265 Z"/>
+            <!-- Florida -->
+            <path d="M555,290 L565,305 L585,300 L600,285 L610,295 L620,310 L630,335 L625,360 L610,380 L595,390 L580,380 L570,360 L565,340 L555,320 L540,300 Z"/>
+            <!-- South Carolina -->
+            <path d="M595,235 L620,225 L640,230 L645,245 L630,260 L610,265 L605,260 Z"/>
+            <!-- North Carolina -->
+            <path d="M575,200 L590,185 L620,190 L640,195 L660,200 L680,205 L685,215 L665,225 L640,230 L620,225 L595,235 Z"/>
+            <!-- Virginia -->
+            <path d="M590,185 L595,160 L620,155 L650,160 L680,170 L700,175 L695,190 L680,205 L660,200 L640,195 L620,190 Z"/>
+            <!-- West Virginia -->
+            <path d="M580,175 L590,185 L595,160 L620,155 L615,145 L600,140 L590,135 L595,160 Z"/>
+            <!-- Pennsylvania -->
+            <path d="M575,128 L600,120 L640,115 L680,118 L685,138 L670,145 L640,148 L615,145 L600,140 L590,135 Z"/>
+            <!-- New York -->
+            <path d="M640,115 L680,118 L700,105 L720,95 L735,92 L740,100 L730,110 L715,118 L700,125 L685,138 L680,118 Z"/>
+            <!-- Vermont -->
+            <path d="M700,105 L710,88 L715,78 L725,82 L720,95 Z"/>
+            <!-- New Hampshire -->
+            <path d="M720,95 L725,82 L735,75 L740,82 L738,95 L735,92 Z"/>
+            <!-- Maine -->
+            <path d="M735,75 L745,60 L760,55 L770,65 L765,80 L755,90 L745,88 L740,82 Z"/>
+            <!-- Massachusetts -->
+            <path d="M715,118 L730,110 L740,100 L750,105 L755,112 L745,118 L730,120 Z"/>
+            <!-- Connecticut -->
+            <path d="M715,118 L730,120 L735,128 L720,130 Z"/>
+            <!-- Rhode Island -->
+            <path d="M735,128 L745,118 L750,122 L745,130 Z"/>
+            <!-- New Jersey -->
+            <path d="M685,138 L700,125 L705,135 L700,150 L690,155 L685,148 Z"/>
+            <!-- Delaware -->
+            <path d="M690,155 L700,150 L705,158 L698,162 Z"/>
+            <!-- Maryland -->
+            <path d="M650,160 L680,170 L690,155 L698,162 L695,172 L700,175 L695,190 L680,170 Z"/>
+          </g>
+
+          <!-- Nashville destination marker -->
+          <circle class="nashville-pulse" cx="540" cy="215" r="8"/>
+          <circle class="nashville-dot" cx="540" cy="215" r="4"/>
+          <text class="map-city-label nashville-label" x="540" y="205" text-anchor="middle">Nashville</text>
+
+          <!-- Flight arcs will be injected here -->
+          <g id="flight-arcs"></g>
+        </svg>
+
+        <!-- Traveler legend -->
+        <div class="map-legend" id="map-legend">
+          <p class="legend-empty">Submit the RSVP form to add your route to the map!</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
   <!-- RSVP -->
   <section id="rsvp" class="section rsvp">
     <div class="container">
-      <div class="section-label">05 — You In?</div>
+      <div class="section-label">06 — You In?</div>
       <h2 class="section-title">RSVP</h2>
       <p class="rsvp-intro">Fill this out so we can plan accordingly. Takes 30 seconds.</p>
 
@@ -447,6 +574,11 @@
         <div class="form-group">
           <label for="name">Your Name</label>
           <input type="text" id="name" name="entry.389993025" placeholder="First and last" required />
+        </div>
+
+        <div class="form-group">
+          <label for="coming-from">Where Are You Coming From?</label>
+          <input type="text" id="coming-from" name="entry.coming_from" placeholder="City, State (e.g. Austin, TX)" />
         </div>
 
         <div class="form-row">

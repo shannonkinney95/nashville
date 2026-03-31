@@ -858,6 +858,157 @@ img {
 }
 
 /* ============================================
+   FLIGHT MAP
+   ============================================ */
+.flight-map {
+  background: var(--bg-dark);
+  color: #fff;
+  overflow: hidden;
+}
+
+.flight-map .section-label {
+  color: rgba(255, 255, 255, 0.35);
+}
+
+.flight-map .section-title {
+  color: #fff;
+}
+
+.map-intro {
+  font-family: var(--font-body);
+  font-size: 15px;
+  font-weight: 300;
+  color: rgba(255, 255, 255, 0.45);
+  margin-bottom: 40px;
+}
+
+.map-wrapper {
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+#us-map {
+  width: 100%;
+  height: auto;
+}
+
+/* Nashville destination */
+.nashville-dot {
+  fill: var(--gold);
+}
+
+.nashville-pulse {
+  fill: none;
+  stroke: var(--gold);
+  stroke-width: 1.5;
+  opacity: 0.6;
+  animation: pulse-ring 2s ease-out infinite;
+}
+
+@keyframes pulse-ring {
+  0% { r: 4; opacity: 0.7; }
+  100% { r: 18; opacity: 0; }
+}
+
+.map-city-label {
+  font-family: var(--font-body);
+  font-size: 9px;
+  font-weight: 500;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  fill: rgba(255, 255, 255, 0.5);
+}
+
+.nashville-label {
+  fill: var(--gold);
+  font-size: 10px;
+  letter-spacing: 2px;
+}
+
+/* Flight arcs */
+.flight-arc {
+  fill: none;
+  stroke: var(--gold);
+  stroke-width: 1.5;
+  stroke-dasharray: 600;
+  stroke-dashoffset: 600;
+  opacity: 0.6;
+  animation: draw-arc 2s ease-in-out forwards;
+}
+
+@keyframes draw-arc {
+  to { stroke-dashoffset: 0; }
+}
+
+.flight-dot {
+  fill: var(--gold);
+  opacity: 0;
+  animation: fade-in-dot 0.3s ease forwards;
+  animation-delay: inherit;
+}
+
+@keyframes fade-in-dot {
+  to { opacity: 1; }
+}
+
+.origin-dot {
+  fill: rgba(255, 255, 255, 0.6);
+  opacity: 0;
+  animation: fade-in-dot 0.5s ease forwards;
+}
+
+.origin-label {
+  fill: rgba(255, 255, 255, 0.45);
+  font-size: 8px;
+  opacity: 0;
+  animation: fade-in-dot 0.5s ease forwards;
+}
+
+/* Legend */
+.map-legend {
+  margin-top: 32px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px 28px;
+  justify-content: center;
+}
+
+.legend-empty {
+  font-family: var(--font-body);
+  font-size: 13px;
+  font-weight: 300;
+  color: rgba(255, 255, 255, 0.25);
+  font-style: italic;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font-body);
+  font-size: 13px;
+  font-weight: 300;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.legend-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--gold);
+  flex-shrink: 0;
+}
+
+.legend-name {
+  color: rgba(255, 255, 255, 0.85);
+  font-weight: 400;
+}
+
+.legend-route {
+  color: rgba(255, 255, 255, 0.35);
+}
+
+/* ============================================
    RSVP FORM
    ============================================ */
 .rsvp {
@@ -1315,8 +1466,25 @@ img {
 
   .style-intro,
   .costs-intro,
-  .rsvp-intro {
+  .rsvp-intro,
+  .map-intro {
     font-size: 17px;
+  }
+
+  .map-city-label {
+    font-size: 7px;
+  }
+
+  .nashville-label {
+    font-size: 8px;
+  }
+
+  .map-legend {
+    gap: 10px 20px;
+  }
+
+  .legend-item {
+    font-size: 12px;
   }
 
   .cost-card {
