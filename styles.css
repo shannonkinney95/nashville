@@ -629,6 +629,12 @@ img {
   font-weight: 300;
   color: var(--text-mid);
   line-height: 1.7;
+}
+
+.style-intro b,
+.style-intro strong {
+  font-weight: 600;
+  color: var(--text);
   max-width: 600px;
   margin-bottom: 48px;
 }
