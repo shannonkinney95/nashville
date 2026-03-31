@@ -1720,6 +1720,126 @@ img {
 }
 
 /* ============================================
+   MUSIC PLAYER
+   ============================================ */
+.music-player {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  z-index: 1000;
+}
+
+.player-toggle {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  border: 1px solid rgba(201, 169, 110, 0.3);
+  background: var(--bg-dark);
+  color: var(--gold);
+  font-size: 20px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+}
+
+.player-toggle:hover {
+  background: rgba(201, 169, 110, 0.15);
+  transform: scale(1.08);
+}
+
+.player-toggle.open {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.player-drawer {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  width: 300px;
+  background: var(--bg-dark);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: var(--radius);
+  box-shadow: 0 8px 40px rgba(0, 0, 0, 0.4);
+  overflow: hidden;
+  opacity: 0;
+  transform: translateY(12px) scale(0.95);
+  pointer-events: none;
+  transition: all 0.3s ease;
+}
+
+.player-drawer.open {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+  pointer-events: auto;
+}
+
+.player-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 16px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.player-title {
+  font-family: var(--font-display);
+  font-size: 16px;
+  font-weight: 400;
+  color: var(--gold);
+  letter-spacing: 0.5px;
+}
+
+.player-close {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(255, 255, 255, 0.06);
+  color: rgba(255, 255, 255, 0.4);
+  font-size: 18px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.25s;
+  padding: 0;
+}
+
+.player-close:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.player-embed {
+  padding: 0 8px 8px;
+}
+
+.player-embed iframe {
+  border-radius: 8px;
+}
+
+@media (max-width: 480px) {
+  .music-player {
+    bottom: 16px;
+    right: 16px;
+  }
+
+  .player-drawer {
+    width: 280px;
+  }
+
+  .player-toggle {
+    width: 42px;
+    height: 42px;
+    font-size: 18px;
+  }
+}
+
+/* ============================================
    SCROLL ANIMATIONS
    ============================================ */
 .reveal {

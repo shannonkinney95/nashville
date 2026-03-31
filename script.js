@@ -624,4 +624,29 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
+  // ---- MySpace-style Music Player ----
+  const PLAYLIST_ID = '2tEEViE1bCd3LXAStk8mfR';
+  const playerToggle = document.getElementById('player-toggle');
+  const playerDrawer = document.getElementById('player-drawer');
+  const playerClose = document.getElementById('player-close');
+  const spotifyEmbed = document.getElementById('spotify-embed');
+  let playerLoaded = false;
+
+  if (playerToggle && playerDrawer) {
+    playerToggle.addEventListener('click', () => {
+      playerDrawer.classList.toggle('open');
+      playerToggle.classList.toggle('open');
+      // Load playlist on first open with autoplay
+      if (!playerLoaded) {
+        spotifyEmbed.src = `https://open.spotify.com/embed/playlist/${PLAYLIST_ID}?utm_source=generator&theme=0&autoplay=1`;
+        playerLoaded = true;
+      }
+    });
+
+    playerClose.addEventListener('click', () => {
+      playerDrawer.classList.remove('open');
+      playerToggle.classList.remove('open');
+    });
+  }
+
 });
