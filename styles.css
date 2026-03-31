@@ -1138,6 +1138,21 @@ img {
   margin-bottom: 6px;
 }
 
+.girl-instagram {
+  display: block;
+  font-family: var(--font-body);
+  font-size: 12px;
+  font-weight: 400;
+  color: var(--gold) !important;
+  margin-bottom: 6px;
+  border-bottom: none !important;
+}
+
+.girl-instagram:hover {
+  opacity: 0.8;
+  border-bottom: none !important;
+}
+
 .girl-from {
   font-family: var(--font-body);
   font-size: 12px;

@@ -166,12 +166,12 @@ document.addEventListener('DOMContentLoaded', () => {
     } catch { return []; }
   }
 
-  function saveTraveler(name, city, connection, photo) {
+  function saveTraveler(name, city, connection, photo, instagram) {
     const travelers = getTravelers();
     // Avoid duplicates by name
     const existing = travelers.findIndex(t => t.name.toLowerCase() === name.toLowerCase());
     if (existing >= 0) travelers.splice(existing, 1);
-    travelers.push({ name, city, connection: connection || '', photo: photo || '' });
+    travelers.push({ name, city, connection: connection || '', photo: photo || '', instagram: instagram || '' });
     localStorage.setItem('nashBashTravelers', JSON.stringify(travelers));
   }
 
@@ -330,6 +330,7 @@ document.addEventListener('DOMContentLoaded', () => {
           <div class="edit-photo-preview">${previewHTML}</div>
         </div>
         <input type="text" class="edit-input" value="${t.name}" placeholder="Name" data-field="name" />
+        <input type="text" class="edit-input" value="${t.instagram || ''}" placeholder="@instagram" data-field="instagram" />
         <input type="text" class="edit-input" value="${t.city || ''}" placeholder="City, State" data-field="city" />
         <input type="text" class="edit-input" value="${t.connection || ''}" placeholder="How you know Shannon" data-field="connection" />
         <div class="edit-actions">
@@ -362,6 +363,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
       const travelers = getTravelers();
       travelers[index].name = vals.name || travelers[index].name;
+      travelers[index].instagram = vals.instagram || '';
       travelers[index].city = vals.city || '';
       travelers[index].connection = vals.connection || '';
 
@@ -411,12 +413,17 @@ document.addEventListener('DOMContentLoaded', () => {
       const photoEl = t.photo
         ? `<img class="girl-photo" src="${t.photo}" alt="${t.name}" />`
         : `<div class="girl-photo-placeholder">${initial}</div>`;
+      const handle = t.instagram ? t.instagram.replace(/^@?/, '@') : '';
+      const igEl = handle
+        ? `<a class="girl-instagram" href="https://instagram.com/${handle.replace('@', '')}" target="_blank" rel="noopener">${handle}</a>`
+        : '';
 
       return `
         <div class="girl-card" data-index="${i}" draggable="true">
           <button class="card-edit-btn" data-index="${i}" title="Edit">✎</button>
           ${photoEl}
           <p class="girl-name">${t.name}</p>
+          ${igEl}
           ${fromLine ? `<p class="girl-from">${fromLine}</p>` : ''}
           ${connectionBadge}
           <p class="card-drag-hint">Hold to drag</p>
@@ -498,6 +505,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const nameVal = document.getElementById('name').value.trim();
       const cityVal = document.getElementById('coming-from').value.trim();
       const connectionVal = document.getElementById('connection').value;
+      const instagramVal = document.getElementById('instagram').value.trim();
       const photoFile = document.getElementById('photo').files[0];
 
       let photoData = '';
@@ -511,7 +519,7 @@ document.addEventListener('DOMContentLoaded', () => {
       }
 
       if (nameVal) {
-        saveTraveler(nameVal, cityVal, connectionVal, photoData);
+        saveTraveler(nameVal, cityVal, connectionVal, photoData, instagramVal);
         renderFlightMap();
         renderGirlsGrid();
       }
