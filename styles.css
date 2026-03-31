@@ -526,7 +526,7 @@ img {
   font-family: var(--font-accent);
   font-size: 48px;
   letter-spacing: 2px;
-  color: rgba(255, 255, 255, 0.12);
+  color: #fff;
   line-height: 1;
 }
 
