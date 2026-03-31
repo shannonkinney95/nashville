@@ -254,7 +254,8 @@ document.addEventListener('DOMContentLoaded', () => {
       arcsGroup.appendChild(label);
 
       // Legend entry
-      legendHTML += `<div class="legend-item"><span class="legend-dot"></span><span class="legend-name">${t.name}</span><span class="legend-route">from ${t.city}</span></div>`;
+      const firstName = t.name.split(' ')[0];
+      legendHTML += `<div class="legend-item"><span class="legend-dot"></span><span class="legend-name">${firstName}</span><span class="legend-route">from ${t.city}</span></div>`;
     });
 
     legend.innerHTML = legendHTML;
