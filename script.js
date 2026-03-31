@@ -63,7 +63,6 @@ document.addEventListener('DOMContentLoaded', () => {
     (entries) => {
       entries.forEach(entry => {
         if (entry.isIntersecting) {
-          // Stagger siblings
           const parent = entry.target.parentElement;
           const siblings = Array.from(parent.querySelectorAll('.reveal'));
           const idx = siblings.indexOf(entry.target);
@@ -89,7 +88,6 @@ document.addEventListener('DOMContentLoaded', () => {
   }, { passive: true });
 
   // ---- Flight map ----
-  // City coordinates mapped to the SVG viewBox (approximate US positions)
   const cityCoords = {
     'nashville':    { x: 540, y: 215 },
     'chicago':      { x: 480, y: 145 },
@@ -152,7 +150,6 @@ document.addEventListener('DOMContentLoaded', () => {
   const NASHVILLE = cityCoords['nashville'];
 
   function parseCityInput(raw) {
-    // Normalize: lowercase, strip state abbreviations and punctuation
     let city = raw.toLowerCase().trim()
       .replace(/,?\s*(tx|il|ny|ca|co|fl|ga|wa|or|ma|pa|oh|tn|mn|mi|mo|ar|la|wi|in|ky|nc|sc|va|wv|md|nj|de|ct|ri|nh|vt|me|az|nm|nv|ut|id|mt|wy|nd|sd|ne|ks|ok|ia|dc|d\.c\.)?\s*$/i, '')
       .replace(/[.]/g, '')
@@ -160,27 +157,14 @@ document.addEventListener('DOMContentLoaded', () => {
     return city;
   }
 
+  // ---- Google Sheet data ----
   const SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/1WbChy0qZD6sQmIip-aoP7RwtClz8Zs2Ft4PX27z2KMA/gviz/tq?tqx=out:csv';
-
-  function getLocalTravelers() {
-    try {
-      return JSON.parse(localStorage.getItem('nashBashTravelers') || '[]');
-    } catch { return []; }
-  }
-
-  function getTravelers() {
-    return getLocalTravelers();
-  }
 
   function parseCSV(text) {
     const lines = text.trim().split('\n');
     if (lines.length < 2) return [];
-    // Parse header
-    const headers = lines[0].match(/(".*?"|[^",]+)(?=\s*,|\s*$)/g)
-      .map(h => h.replace(/^"|"$/g, '').trim().toLowerCase());
-    const nameIdx = headers.findIndex(h => h.includes('name'));
 
-    return lines.slice(1).map(line => {
+    const parseRow = (line) => {
       const cols = [];
       let current = '';
       let inQuotes = false;
@@ -191,11 +175,35 @@ document.addEventListener('DOMContentLoaded', () => {
         else { current += ch; }
       }
       cols.push(current.trim());
-      return { name: nameIdx >= 0 ? cols[nameIdx] || '' : '' };
+      return cols;
+    };
+
+    const headers = parseRow(lines[0]).map(h => h.toLowerCase());
+
+    // Prefer the last (newest) column when duplicates exist
+    const findLast = (keyword) => {
+      let idx = -1;
+      headers.forEach((h, i) => { if (h.includes(keyword)) idx = i; });
+      return idx;
+    };
+
+    const nameIdx = findLast('name');
+    const cityIdx = findLast('where');
+    const connectionIdx = findLast('connection');
+    const instagramIdx = findLast('instagram');
+
+    return lines.slice(1).map(line => {
+      const cols = parseRow(line);
+      return {
+        name: nameIdx >= 0 ? cols[nameIdx] || '' : '',
+        city: cityIdx >= 0 ? cols[cityIdx] || '' : '',
+        connection: connectionIdx >= 0 ? cols[connectionIdx] || '' : '',
+        instagram: instagramIdx >= 0 ? cols[instagramIdx] || '' : '',
+      };
     }).filter(r => r.name);
   }
 
-  async function fetchSheetTravelers() {
+  async function fetchTravelers() {
     try {
       const resp = await fetch(SHEET_CSV_URL);
       if (!resp.ok) return [];
@@ -204,62 +212,14 @@ document.addEventListener('DOMContentLoaded', () => {
     } catch { return []; }
   }
 
-  // Merge sheet data (shared names) with localStorage (photos, instagram, etc.)
-  function mergeTravelers(sheetData, localData) {
-    const merged = [];
-    const localMap = {};
-    localData.forEach(t => { localMap[t.name.toLowerCase()] = t; });
-    const seen = new Set();
-
-    // Sheet entries first (shared source of truth for who's attending)
-    sheetData.forEach(s => {
-      const key = s.name.toLowerCase();
-      seen.add(key);
-      const local = localMap[key] || {};
-      merged.push({
-        name: s.name,
-        city: local.city || '',
-        connection: local.connection || '',
-        instagram: local.instagram || '',
-        photo: local.photo || '',
-      });
-    });
-
-    // Add any local-only entries (submitted on this device but not yet in sheet)
-    localData.forEach(t => {
-      if (!seen.has(t.name.toLowerCase())) {
-        merged.push(t);
-      }
-    });
-
-    return merged;
-  }
-
-  async function loadAllTravelers() {
-    const sheetData = await fetchSheetTravelers();
-    const localData = getLocalTravelers();
-    return mergeTravelers(sheetData, localData);
-  }
-
-  function saveTraveler(name, city, connection, photo, instagram) {
-    const travelers = getTravelers();
-    // Avoid duplicates by name
-    const existing = travelers.findIndex(t => t.name.toLowerCase() === name.toLowerCase());
-    if (existing >= 0) travelers.splice(existing, 1);
-    travelers.push({ name, city, connection: connection || '', photo: photo || '', instagram: instagram || '' });
-    localStorage.setItem('nashBashTravelers', JSON.stringify(travelers));
-  }
-
+  // ---- Flight map rendering ----
   function createArcPath(from, to) {
     const dx = to.x - from.x;
     const dy = to.y - from.y;
     const dist = Math.sqrt(dx * dx + dy * dy);
-    // Arc curvature proportional to distance
     const curve = dist * 0.3;
-    // Control point perpendicular to midpoint
     const mx = (from.x + to.x) / 2;
     const my = (from.y + to.y) / 2;
-    // Perpendicular offset (always curve upward)
     const nx = -dy / dist;
     const ny = dx / dist;
     const cx = mx + nx * curve;
@@ -267,15 +227,14 @@ document.addEventListener('DOMContentLoaded', () => {
     return `M${from.x},${from.y} Q${cx},${cy} ${to.x},${to.y}`;
   }
 
-  function renderFlightMap(travelersOverride) {
+  function renderFlightMap(travelers) {
     const arcsGroup = document.getElementById('flight-arcs');
     const legend = document.getElementById('map-legend');
     if (!arcsGroup || !legend) return;
 
-    const travelers = travelersOverride || getTravelers();
     arcsGroup.innerHTML = '';
 
-    if (travelers.length === 0) {
+    if (!travelers || travelers.length === 0) {
       legend.innerHTML = '<p class="legend-empty">Submit the RSVP form to add your route to the map!</p>';
       return;
     }
@@ -284,20 +243,19 @@ document.addEventListener('DOMContentLoaded', () => {
     let legendHTML = '';
 
     travelers.forEach((t, i) => {
+      if (!t.city) return;
       const cityKey = parseCityInput(t.city);
       const coords = cityCoords[cityKey];
       if (!coords) return;
 
       const delay = i * 0.3;
 
-      // Arc path
       const path = document.createElementNS(svgNS, 'path');
       path.setAttribute('d', createArcPath(coords, NASHVILLE));
       path.setAttribute('class', 'flight-arc');
       path.setAttribute('style', `animation-delay: ${delay}s`);
       arcsGroup.appendChild(path);
 
-      // Animated dot traveling along the arc
       const dot = document.createElementNS(svgNS, 'circle');
       dot.setAttribute('r', '3');
       dot.setAttribute('class', 'flight-dot');
@@ -309,7 +267,6 @@ document.addEventListener('DOMContentLoaded', () => {
       dot.appendChild(anim);
       arcsGroup.appendChild(dot);
 
-      // Origin city marker
       const marker = document.createElementNS(svgNS, 'circle');
       marker.setAttribute('cx', coords.x);
       marker.setAttribute('cy', coords.y);
@@ -318,7 +275,6 @@ document.addEventListener('DOMContentLoaded', () => {
       marker.setAttribute('style', `animation-delay: ${delay}s`);
       arcsGroup.appendChild(marker);
 
-      // Origin label
       const label = document.createElementNS(svgNS, 'text');
       label.setAttribute('x', coords.x);
       label.setAttribute('y', coords.y - 10);
@@ -328,7 +284,6 @@ document.addEventListener('DOMContentLoaded', () => {
       label.textContent = t.city;
       arcsGroup.appendChild(label);
 
-      // Legend entry
       const firstName = t.name.split(' ')[0];
       legendHTML += `<div class="legend-item"><span class="legend-dot"></span><span class="legend-name">${firstName}</span><span class="legend-route">from ${t.city}</span></div>`;
     });
@@ -336,242 +291,60 @@ document.addEventListener('DOMContentLoaded', () => {
     legend.innerHTML = legendHTML;
   }
 
-  // ---- Drag and drop state ----
-  let dragSrcIndex = null;
-
-  function handleDragStart(e) {
-    const card = e.target.closest('.girl-card');
-    if (!card) return;
-    dragSrcIndex = parseInt(card.dataset.index);
-    card.classList.add('dragging');
-    e.dataTransfer.effectAllowed = 'move';
-    e.dataTransfer.setData('text/plain', dragSrcIndex);
-  }
-
-  function handleDragOver(e) {
-    e.preventDefault();
-    e.dataTransfer.dropEffect = 'move';
-    const card = e.target.closest('.girl-card');
-    if (card) card.classList.add('drag-over');
-  }
-
-  function handleDragLeave(e) {
-    const card = e.target.closest('.girl-card');
-    if (card) card.classList.remove('drag-over');
-  }
-
-  function handleDrop(e) {
-    e.preventDefault();
-    const card = e.target.closest('.girl-card');
-    if (!card) return;
-    card.classList.remove('drag-over');
-    const dropIndex = parseInt(card.dataset.index);
-    if (dragSrcIndex === null || dragSrcIndex === dropIndex) return;
-
-    const travelers = getTravelers();
-    const [moved] = travelers.splice(dragSrcIndex, 1);
-    travelers.splice(dropIndex, 0, moved);
-    localStorage.setItem('nashBashTravelers', JSON.stringify(travelers));
-    renderGirlsGrid();
-  }
-
-  function handleDragEnd(e) {
-    dragSrcIndex = null;
-    document.querySelectorAll('.girl-card').forEach(c => {
-      c.classList.remove('dragging', 'drag-over');
-    });
-  }
-
-  // ---- Edit card ----
-  function startEdit(index) {
-    const travelers = getTravelers();
-    const t = travelers[index];
-    if (!t) return;
-
-    const card = document.querySelector(`.girl-card[data-index="${index}"]`);
-    if (!card) return;
-
-    const photoSrc = t.photo || '';
-    const previewHTML = photoSrc
-      ? `<img src="${photoSrc}" alt="Preview" />`
-      : `<span class="photo-upload-icon">+</span>`;
-
-    card.classList.add('girl-card-editing');
-    card.setAttribute('draggable', 'false');
-    card.innerHTML = `
-      <div class="edit-form">
-        <div class="edit-photo-upload">
-          <input type="file" class="edit-photo-input" accept="image/*" />
-          <div class="edit-photo-preview">${previewHTML}</div>
-        </div>
-        <input type="text" class="edit-input" value="${t.name}" placeholder="Name" data-field="name" />
-        <input type="text" class="edit-input" value="${t.instagram || ''}" placeholder="@instagram" data-field="instagram" />
-        <input type="text" class="edit-input" value="${t.city || ''}" placeholder="City, State" data-field="city" />
-        <input type="text" class="edit-input" value="${t.connection || ''}" placeholder="How you know Shannon" data-field="connection" />
-        <div class="edit-actions">
-          <button class="edit-save" data-index="${index}">Save</button>
-          <button class="edit-cancel" data-index="${index}">Cancel</button>
-          <button class="edit-delete" data-index="${index}">Remove</button>
-        </div>
-      </div>
-    `;
-
-    // Photo change handler
-    const fileInput = card.querySelector('.edit-photo-input');
-    const preview = card.querySelector('.edit-photo-preview');
-    fileInput.addEventListener('change', () => {
-      const file = fileInput.files[0];
-      if (!file) return;
-      const reader = new FileReader();
-      reader.onload = (ev) => {
-        preview.innerHTML = `<img src="${ev.target.result}" alt="Preview" />`;
-        preview.dataset.newPhoto = ev.target.result;
-      };
-      reader.readAsDataURL(file);
-    });
-
-    // Save
-    card.querySelector('.edit-save').addEventListener('click', async () => {
-      const inputs = card.querySelectorAll('.edit-input');
-      const vals = {};
-      inputs.forEach(inp => { vals[inp.dataset.field] = inp.value.trim(); });
-
-      const travelers = getTravelers();
-      travelers[index].name = vals.name || travelers[index].name;
-      travelers[index].instagram = vals.instagram || '';
-      travelers[index].city = vals.city || '';
-      travelers[index].connection = vals.connection || '';
-
-      // Handle new photo
-      const newPhotoData = preview.dataset.newPhoto;
-      if (newPhotoData) {
-        travelers[index].photo = await resizeImage(newPhotoData, 150);
-      }
-
-      localStorage.setItem('nashBashTravelers', JSON.stringify(travelers));
-      renderGirlsGrid();
-      renderFlightMap();
-    });
-
-    // Cancel
-    card.querySelector('.edit-cancel').addEventListener('click', () => {
-      renderGirlsGrid();
-    });
-
-    // Delete
-    card.querySelector('.edit-delete').addEventListener('click', () => {
-      const travelers = getTravelers();
-      travelers.splice(index, 1);
-      localStorage.setItem('nashBashTravelers', JSON.stringify(travelers));
-      renderGirlsGrid();
-      renderFlightMap();
-    });
-  }
-
-  function renderGirlsGrid(travelersOverride) {
+  // ---- Girls grid rendering ----
+  function renderGirlsGrid(travelers) {
     const grid = document.getElementById('girls-grid');
     if (!grid) return;
 
-    const travelers = travelersOverride || getTravelers();
-
-    if (travelers.length === 0) {
+    if (!travelers || travelers.length === 0) {
       grid.innerHTML = '<p class="girls-empty">No one here yet — RSVP to join the crew!</p>';
       return;
     }
 
-    grid.innerHTML = travelers.map((t, i) => {
+    grid.innerHTML = travelers.map((t) => {
       const initial = t.name.charAt(0).toUpperCase();
       const fromLine = t.city ? `From ${t.city}` : '';
       const connectionBadge = t.connection
         ? `<span class="girl-connection">${t.connection}</span>`
         : '';
-      const photoEl = t.photo
-        ? `<img class="girl-photo" src="${t.photo}" alt="${t.name}" />`
-        : `<div class="girl-photo-placeholder">${initial}</div>`;
+      const photoEl = `<div class="girl-photo-placeholder">${initial}</div>`;
       const handle = t.instagram ? t.instagram.replace(/^@?/, '@') : '';
       const igEl = handle
         ? `<a class="girl-instagram" href="https://instagram.com/${handle.replace('@', '')}" target="_blank" rel="noopener">${handle}</a>`
         : '';
 
       return `
-        <div class="girl-card" data-index="${i}" draggable="true">
-          <button class="card-edit-btn" data-index="${i}" title="Edit">✎</button>
+        <div class="girl-card">
           ${photoEl}
           <p class="girl-name">${t.name}</p>
           ${igEl}
           ${fromLine ? `<p class="girl-from">${fromLine}</p>` : ''}
           ${connectionBadge}
-          <p class="card-drag-hint">Hold to drag</p>
         </div>
       `;
     }).join('');
-
-    // Attach edit handlers
-    grid.querySelectorAll('.card-edit-btn').forEach(btn => {
-      btn.addEventListener('click', (e) => {
-        e.stopPropagation();
-        startEdit(parseInt(btn.dataset.index));
-      });
-    });
-
-    // Attach drag handlers
-    grid.querySelectorAll('.girl-card').forEach(card => {
-      card.addEventListener('dragstart', handleDragStart);
-      card.addEventListener('dragover', handleDragOver);
-      card.addEventListener('dragleave', handleDragLeave);
-      card.addEventListener('drop', handleDrop);
-      card.addEventListener('dragend', handleDragEnd);
-    });
   }
 
-  // Render on load — show local data immediately, then merge with sheet
-  renderFlightMap();
-  renderGirlsGrid();
+  // ---- Load data from sheet and render ----
+  renderFlightMap([]);
+  renderGirlsGrid([]);
 
-  // Fetch shared data from Google Sheet and re-render
-  loadAllTravelers().then(merged => {
-    renderFlightMap(merged);
-    renderGirlsGrid(merged);
+  fetchTravelers().then(travelers => {
+    renderFlightMap(travelers);
+    renderGirlsGrid(travelers);
   });
 
-  // ---- Photo upload preview ----
-  const photoInput = document.getElementById('photo');
-  const photoPreview = document.getElementById('photo-preview');
+  // ---- Spotify widget toggle ----
+  const spotifyToggle = document.getElementById('spotify-toggle');
+  const spotifyWidget = document.getElementById('spotify-widget');
 
-  if (photoInput && photoPreview) {
-    photoInput.addEventListener('change', () => {
-      const file = photoInput.files[0];
-      if (!file) return;
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        photoPreview.innerHTML = `<img src="${e.target.result}" alt="Preview" />`;
-        document.querySelector('.photo-upload-label').textContent = file.name;
-      };
-      reader.readAsDataURL(file);
+  if (spotifyToggle && spotifyWidget) {
+    spotifyToggle.addEventListener('click', () => {
+      spotifyWidget.classList.toggle('open');
     });
   }
 
-  // Helper: resize image to a small thumbnail before storing
-  function resizeImage(dataUrl, maxSize) {
-    return new Promise((resolve) => {
-      const img = new Image();
-      img.onload = () => {
-        const canvas = document.createElement('canvas');
-        let w = img.width;
-        let h = img.height;
-        if (w > h) { h = (maxSize / w) * h; w = maxSize; }
-        else { w = (maxSize / h) * w; h = maxSize; }
-        canvas.width = w;
-        canvas.height = h;
-        const ctx = canvas.getContext('2d');
-        ctx.drawImage(img, 0, 0, w, h);
-        resolve(canvas.toDataURL('image/jpeg', 0.7));
-      };
-      img.src = dataUrl;
-    });
-  }
-
-  // ---- RSVP form → Google Sheets ----
+  // ---- RSVP form → Google Forms ----
   const form = document.getElementById('rsvp-form');
   const successEl = document.getElementById('form-success');
 
@@ -581,29 +354,6 @@ document.addEventListener('DOMContentLoaded', () => {
       const btn = form.querySelector('.form-submit');
       btn.textContent = 'Sending...';
       btn.disabled = true;
-
-      // Save traveler data for the flight map and girls grid
-      const nameVal = document.getElementById('name').value.trim();
-      const cityVal = document.getElementById('coming-from').value.trim();
-      const connectionVal = document.getElementById('connection').value;
-      const instagramVal = document.getElementById('instagram').value.trim();
-      const photoFile = document.getElementById('photo').files[0];
-
-      let photoData = '';
-      if (photoFile) {
-        const rawData = await new Promise((resolve) => {
-          const r = new FileReader();
-          r.onload = (ev) => resolve(ev.target.result);
-          r.readAsDataURL(photoFile);
-        });
-        photoData = await resizeImage(rawData, 150);
-      }
-
-      if (nameVal) {
-        saveTraveler(nameVal, cityVal, connectionVal, photoData, instagramVal);
-        renderFlightMap();
-        renderGirlsGrid();
-      }
 
       const formData = new FormData(form);
       const url = 'https://docs.google.com/forms/d/e/1FAIpQLSelatd0CWxQg13PVsEb8vSERQ8WBFs1b1oxV5JEIQLa1XbVHg/formResponse';
@@ -617,10 +367,16 @@ document.addEventListener('DOMContentLoaded', () => {
         form.style.display = 'none';
         successEl.style.display = 'block';
       } catch {
-        // no-cors means we can't read the response, but Google still receives the data
         form.style.display = 'none';
         successEl.style.display = 'block';
       }
+
+      // Re-fetch after a delay so the new entry appears
+      setTimeout(async () => {
+        const travelers = await fetchTravelers();
+        renderFlightMap(travelers);
+        renderGirlsGrid(travelers);
+      }, 3000);
     });
   }
 
