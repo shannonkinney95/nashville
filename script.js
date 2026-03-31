@@ -256,16 +256,19 @@ document.addEventListener('DOMContentLoaded', () => {
       path.setAttribute('style', `animation-delay: ${delay}s`);
       arcsGroup.appendChild(path);
 
-      const dot = document.createElementNS(svgNS, 'circle');
-      dot.setAttribute('r', '3');
-      dot.setAttribute('class', 'flight-dot');
+      const emoji = document.createElementNS(svgNS, 'text');
+      emoji.setAttribute('class', 'flight-dot');
+      emoji.setAttribute('font-size', '14');
+      emoji.setAttribute('text-anchor', 'middle');
+      emoji.setAttribute('dominant-baseline', 'central');
+      emoji.textContent = '\u{1F920}';
       const anim = document.createElementNS(svgNS, 'animateMotion');
       anim.setAttribute('dur', '2s');
       anim.setAttribute('begin', `${delay}s`);
       anim.setAttribute('fill', 'freeze');
       anim.setAttribute('path', createArcPath(coords, NASHVILLE));
-      dot.appendChild(anim);
-      arcsGroup.appendChild(dot);
+      emoji.appendChild(anim);
+      arcsGroup.appendChild(emoji);
 
       const marker = document.createElementNS(svgNS, 'circle');
       marker.setAttribute('cx', coords.x);
