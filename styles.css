@@ -36,6 +36,16 @@ html {
   scroll-padding-top: 72px;
 }
 
+/* All content links default to gold */
+a {
+  color: var(--gold);
+  text-decoration: none;
+}
+
+a:hover {
+  color: var(--gold);
+}
+
 body {
   font-family: var(--font-body);
   color: var(--text);
