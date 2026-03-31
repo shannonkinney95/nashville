@@ -575,6 +575,17 @@ img {
   border-color: var(--gold);
 }
 
+.event-desc a {
+  color: var(--gold);
+  text-decoration: none;
+  border-bottom: 1px solid rgba(201, 169, 110, 0.3);
+  transition: border-color 0.3s;
+}
+
+.event-desc a:hover {
+  border-color: var(--gold);
+}
+
 /* ============================================
    STYLE GUIDE
    ============================================ */
