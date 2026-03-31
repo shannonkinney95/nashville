@@ -1185,184 +1185,72 @@ img {
   cursor: grabbing;
 }
 
-.card-edit-btn {
-  position: absolute;
-  top: 10px;
-  right: 10px;
-  width: 28px;
-  height: 28px;
-  border-radius: 50%;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  background: rgba(255, 255, 255, 0.05);
-  color: rgba(255, 255, 255, 0.3);
-  font-size: 13px;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: all 0.25s;
-  opacity: 0;
-  padding: 0;
-}
 
-.girl-card:hover .card-edit-btn {
-  opacity: 1;
-}
 
-.card-edit-btn:hover {
-  background: rgba(201, 169, 110, 0.15);
-  border-color: rgba(201, 169, 110, 0.3);
-  color: var(--gold);
-}
-
-.card-drag-hint {
-  font-family: var(--font-body);
-  font-size: 10px;
-  color: rgba(255, 255, 255, 0.15);
-  margin-top: 10px;
-  opacity: 0;
-  transition: opacity 0.25s;
-}
-
-.girl-card:hover .card-drag-hint {
-  opacity: 1;
-}
-
-/* Drag states */
-.girl-card.dragging {
-  opacity: 0.4;
-  transform: scale(0.95);
-}
-
-.girl-card.drag-over {
-  border-color: var(--gold);
-  background: rgba(201, 169, 110, 0.08);
-  box-shadow: 0 0 0 2px rgba(201, 169, 110, 0.15);
-}
-
-/* Edit mode */
-.girl-card-editing {
-  padding: 20px !important;
-  text-align: left !important;
-}
-
-.edit-form {
+/* ============================================
+   SPOTIFY WIDGET (fixed bottom-right)
+   ============================================ */
+.spotify-widget {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  z-index: 1000;
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  align-items: flex-end;
+  gap: 12px;
 }
 
-.edit-photo-upload {
-  position: relative;
-  width: 64px;
-  height: 64px;
-  margin: 0 auto 4px;
-  cursor: pointer;
-}
-
-.edit-photo-upload input[type="file"] {
-  position: absolute;
-  inset: 0;
-  opacity: 0;
-  cursor: pointer;
-  z-index: 2;
-}
-
-.edit-photo-preview {
-  width: 64px;
-  height: 64px;
+.spotify-toggle {
+  width: 52px;
+  height: 52px;
   border-radius: 50%;
-  background: rgba(201, 169, 110, 0.1);
-  border: 2px dashed rgba(201, 169, 110, 0.25);
+  border: none;
+  background: #1DB954;
+  color: #fff;
+  cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.spotify-toggle:hover {
+  transform: scale(1.08);
+  box-shadow: 0 6px 28px rgba(0, 0, 0, 0.35);
+}
+
+.spotify-player {
+  width: 320px;
+  border-radius: 12px;
   overflow: hidden;
-  transition: border-color 0.25s;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  display: none;
 }
 
-.edit-photo-upload:hover .edit-photo-preview {
-  border-color: var(--gold);
+.spotify-widget.open .spotify-player {
+  display: block;
 }
 
-.edit-photo-preview img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  border-radius: 50%;
+.spotify-player iframe {
+  display: block;
 }
 
-.edit-input {
-  width: 100%;
-  font-family: var(--font-body);
-  font-size: 13px;
-  font-weight: 300;
-  color: #fff;
-  background: rgba(255, 255, 255, 0.06);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 6px;
-  padding: 10px 12px;
-  outline: none;
-  transition: border-color 0.25s;
-}
+@media (max-width: 480px) {
+  .spotify-widget {
+    bottom: 16px;
+    right: 16px;
+  }
 
-.edit-input:focus {
-  border-color: var(--gold);
-}
+  .spotify-player {
+    width: 280px;
+  }
 
-.edit-input::placeholder {
-  color: rgba(255, 255, 255, 0.2);
-}
-
-.edit-actions {
-  display: flex;
-  gap: 6px;
-  margin-top: 4px;
-}
-
-.edit-save,
-.edit-cancel,
-.edit-delete {
-  flex: 1;
-  font-family: var(--font-body);
-  font-size: 10px;
-  font-weight: 500;
-  letter-spacing: 1px;
-  text-transform: uppercase;
-  border: none;
-  border-radius: 6px;
-  padding: 8px 0;
-  cursor: pointer;
-  transition: all 0.25s;
-}
-
-.edit-save {
-  background: var(--gold);
-  color: var(--bg-dark);
-}
-
-.edit-save:hover {
-  background: #d4b87a;
-}
-
-.edit-cancel {
-  background: rgba(255, 255, 255, 0.08);
-  color: rgba(255, 255, 255, 0.5);
-}
-
-.edit-cancel:hover {
-  background: rgba(255, 255, 255, 0.12);
-  color: rgba(255, 255, 255, 0.7);
-}
-
-.edit-delete {
-  background: rgba(255, 80, 80, 0.1);
-  color: rgba(255, 100, 100, 0.7);
-}
-
-.edit-delete:hover {
-  background: rgba(255, 80, 80, 0.2);
-  color: rgba(255, 100, 100, 0.9);
+  .spotify-toggle {
+    width: 46px;
+    height: 46px;
+  }
 }
 
 /* ============================================
@@ -1472,76 +1360,7 @@ img {
   background-position: right 16px center;
 }
 
-/* Photo upload */
-.photo-upload {
-  position: relative;
-}
 
-.photo-upload input[type="file"] {
-  position: absolute;
-  inset: 0;
-  opacity: 0;
-  cursor: pointer;
-  z-index: 2;
-}
-
-.photo-upload-content {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  padding: 16px;
-  background: rgba(255, 255, 255, 0.06);
-  border: 1px dashed rgba(255, 255, 255, 0.12);
-  border-radius: var(--radius-sm);
-  transition: border-color 0.3s, background 0.3s;
-}
-
-.photo-upload:hover .photo-upload-content {
-  border-color: rgba(201, 169, 110, 0.3);
-  background: rgba(255, 255, 255, 0.08);
-}
-
-.photo-upload-preview {
-  width: 56px;
-  height: 56px;
-  border-radius: 50%;
-  background: rgba(201, 169, 110, 0.1);
-  border: 2px solid rgba(201, 169, 110, 0.2);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-  overflow: hidden;
-}
-
-.photo-upload-preview img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  border-radius: 50%;
-}
-
-.photo-upload-icon {
-  font-size: 22px;
-  color: var(--gold);
-  font-weight: 300;
-  line-height: 1;
-}
-
-.photo-upload-label {
-  font-family: var(--font-body);
-  font-size: 14px;
-  font-weight: 400;
-  color: rgba(255, 255, 255, 0.6);
-}
-
-.photo-upload-hint {
-  font-family: var(--font-body);
-  font-size: 11px;
-  font-weight: 300;
-  color: rgba(255, 255, 255, 0.25);
-  margin-top: 3px;
-}
 
 /* Date & time inputs */
 .form-group input[type="date"],
