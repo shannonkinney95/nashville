@@ -1008,6 +1008,111 @@ img {
   color: rgba(255, 255, 255, 0.35);
 }
 
+/* About the Girls */
+.girls-section {
+  margin-top: 72px;
+  padding-top: 56px;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.girls-title {
+  font-family: var(--font-display);
+  font-size: 32px;
+  font-weight: 300;
+  color: #fff;
+  text-align: center;
+  margin-bottom: 40px;
+}
+
+.girls-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 24px;
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.girls-empty {
+  grid-column: 1 / -1;
+  text-align: center;
+  font-family: var(--font-body);
+  font-size: 13px;
+  font-weight: 300;
+  color: rgba(255, 255, 255, 0.25);
+  font-style: italic;
+  padding: 20px 0;
+}
+
+.girl-card {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: var(--radius);
+  padding: 24px 20px;
+  text-align: center;
+  transition: border-color 0.3s, background 0.3s;
+}
+
+.girl-card:hover {
+  border-color: rgba(201, 169, 110, 0.25);
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.girl-photo {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  object-fit: cover;
+  margin: 0 auto 16px;
+  display: block;
+  border: 2px solid rgba(255, 255, 255, 0.08);
+}
+
+.girl-photo-placeholder {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  margin: 0 auto 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(201, 169, 110, 0.12);
+  border: 2px solid rgba(201, 169, 110, 0.2);
+  font-size: 28px;
+  color: var(--gold);
+  font-family: var(--font-display);
+  font-weight: 300;
+}
+
+.girl-name {
+  font-family: var(--font-display);
+  font-size: 20px;
+  font-weight: 400;
+  color: #fff;
+  margin-bottom: 6px;
+}
+
+.girl-from {
+  font-family: var(--font-body);
+  font-size: 12px;
+  font-weight: 300;
+  color: rgba(255, 255, 255, 0.4);
+  margin-bottom: 10px;
+}
+
+.girl-connection {
+  display: inline-block;
+  font-family: var(--font-body);
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--gold);
+  background: rgba(201, 169, 110, 0.1);
+  border: 1px solid rgba(201, 169, 110, 0.15);
+  border-radius: 20px;
+  padding: 5px 14px;
+}
+
 /* ============================================
    RSVP FORM
    ============================================ */
@@ -1079,6 +1184,40 @@ img {
 .form-group input:focus {
   border-color: var(--gold);
   background: rgba(255, 255, 255, 0.08);
+}
+
+/* Select dropdown */
+.form-group select {
+  width: 100%;
+  font-family: var(--font-body);
+  font-size: 15px;
+  font-weight: 300;
+  color: #fff;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: var(--radius-sm);
+  padding: 14px 16px;
+  transition: border-color 0.3s, background 0.3s;
+  outline: none;
+  cursor: pointer;
+  appearance: none;
+  -webkit-appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='rgba(255,255,255,0.4)' d='M1.41 0L6 4.58 10.59 0 12 1.41l-6 6-6-6z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 16px center;
+}
+
+.form-group select option {
+  background: var(--bg-dark);
+  color: #fff;
+}
+
+.form-group select:focus {
+  border-color: var(--gold);
+  background-color: rgba(255, 255, 255, 0.08);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='rgba(255,255,255,0.4)' d='M1.41 0L6 4.58 10.59 0 12 1.41l-6 6-6-6z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 16px center;
 }
 
 /* Date & time inputs */

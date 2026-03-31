@@ -560,6 +560,14 @@
           <p class="legend-empty">Submit the RSVP form to add your route to the map!</p>
         </div>
       </div>
+
+      <!-- About the Girls -->
+      <div class="girls-section">
+        <h3 class="girls-title">About the Girls</h3>
+        <div class="girls-grid" id="girls-grid">
+          <p class="girls-empty">No one here yet — RSVP to join the crew!</p>
+        </div>
+      </div>
     </div>
   </section>
 
@@ -576,9 +584,20 @@
           <input type="text" id="name" name="entry.389993025" placeholder="First and last" required />
         </div>
 
-        <div class="form-group">
-          <label for="coming-from">Where Are You Coming From?</label>
-          <input type="text" id="coming-from" name="entry.coming_from" placeholder="City, State (e.g. Austin, TX)" />
+        <div class="form-row">
+          <div class="form-group">
+            <label for="coming-from">Where Are You Coming From?</label>
+            <input type="text" id="coming-from" name="entry.coming_from" placeholder="City, State (e.g. Austin, TX)" />
+          </div>
+          <div class="form-group">
+            <label for="connection">How Do You Know Shannon?</label>
+            <select id="connection" name="entry.connection">
+              <option value="" disabled selected>Select one</option>
+              <option value="High School">High School</option>
+              <option value="College">College</option>
+              <option value="Post-Grad">Post-Grad</option>
+            </select>
+          </div>
         </div>
 
         <div class="form-row">

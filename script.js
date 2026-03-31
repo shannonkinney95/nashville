@@ -54,6 +54,7 @@ document.addEventListener('DOMContentLoaded', () => {
     ...document.querySelectorAll('.total-card'),
     ...document.querySelectorAll('.rsvp-form'),
     ...document.querySelectorAll('.map-wrapper'),
+    ...document.querySelectorAll('.girls-section'),
   ];
 
   revealTargets.forEach(el => el.classList.add('reveal'));
@@ -165,12 +166,12 @@ document.addEventListener('DOMContentLoaded', () => {
     } catch { return []; }
   }
 
-  function saveTraveler(name, city) {
+  function saveTraveler(name, city, connection) {
     const travelers = getTravelers();
     // Avoid duplicates by name
     const existing = travelers.findIndex(t => t.name.toLowerCase() === name.toLowerCase());
     if (existing >= 0) travelers.splice(existing, 1);
-    travelers.push({ name, city });
+    travelers.push({ name, city, connection: connection || '' });
     localStorage.setItem('nashBashTravelers', JSON.stringify(travelers));
   }
 
@@ -259,8 +260,38 @@ document.addEventListener('DOMContentLoaded', () => {
     legend.innerHTML = legendHTML;
   }
 
+  function renderGirlsGrid() {
+    const grid = document.getElementById('girls-grid');
+    if (!grid) return;
+
+    const travelers = getTravelers();
+
+    if (travelers.length === 0) {
+      grid.innerHTML = '<p class="girls-empty">No one here yet — RSVP to join the crew!</p>';
+      return;
+    }
+
+    grid.innerHTML = travelers.map(t => {
+      const initial = t.name.charAt(0).toUpperCase();
+      const fromLine = t.city ? `From ${t.city}` : '';
+      const connectionBadge = t.connection
+        ? `<span class="girl-connection">${t.connection}</span>`
+        : '';
+
+      return `
+        <div class="girl-card">
+          <div class="girl-photo-placeholder">${initial}</div>
+          <p class="girl-name">${t.name}</p>
+          ${fromLine ? `<p class="girl-from">${fromLine}</p>` : ''}
+          ${connectionBadge}
+        </div>
+      `;
+    }).join('');
+  }
+
   // Render on load
   renderFlightMap();
+  renderGirlsGrid();
 
   // ---- RSVP form → Google Sheets ----
   const form = document.getElementById('rsvp-form');
@@ -273,12 +304,14 @@ document.addEventListener('DOMContentLoaded', () => {
       btn.textContent = 'Sending...';
       btn.disabled = true;
 
-      // Save traveler data for the flight map
+      // Save traveler data for the flight map and girls grid
       const nameVal = document.getElementById('name').value.trim();
       const cityVal = document.getElementById('coming-from').value.trim();
-      if (nameVal && cityVal) {
-        saveTraveler(nameVal, cityVal);
+      const connectionVal = document.getElementById('connection').value;
+      if (nameVal) {
+        saveTraveler(nameVal, cityVal, connectionVal);
         renderFlightMap();
+        renderGirlsGrid();
       }
 
       const formData = new FormData(form);
