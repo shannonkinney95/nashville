@@ -160,10 +160,85 @@ document.addEventListener('DOMContentLoaded', () => {
     return city;
   }
 
-  function getTravelers() {
+  const SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/1WbChy0qZD6sQmIip-aoP7RwtClz8Zs2Ft4PX27z2KMA/gviz/tq?tqx=out:csv';
+
+  function getLocalTravelers() {
     try {
       return JSON.parse(localStorage.getItem('nashBashTravelers') || '[]');
     } catch { return []; }
+  }
+
+  function getTravelers() {
+    return getLocalTravelers();
+  }
+
+  function parseCSV(text) {
+    const lines = text.trim().split('\n');
+    if (lines.length < 2) return [];
+    // Parse header
+    const headers = lines[0].match(/(".*?"|[^",]+)(?=\s*,|\s*$)/g)
+      .map(h => h.replace(/^"|"$/g, '').trim().toLowerCase());
+    const nameIdx = headers.findIndex(h => h.includes('name'));
+
+    return lines.slice(1).map(line => {
+      const cols = [];
+      let current = '';
+      let inQuotes = false;
+      for (let i = 0; i < line.length; i++) {
+        const ch = line[i];
+        if (ch === '"') { inQuotes = !inQuotes; }
+        else if (ch === ',' && !inQuotes) { cols.push(current.trim()); current = ''; }
+        else { current += ch; }
+      }
+      cols.push(current.trim());
+      return { name: nameIdx >= 0 ? cols[nameIdx] || '' : '' };
+    }).filter(r => r.name);
+  }
+
+  async function fetchSheetTravelers() {
+    try {
+      const resp = await fetch(SHEET_CSV_URL);
+      if (!resp.ok) return [];
+      const text = await resp.text();
+      return parseCSV(text);
+    } catch { return []; }
+  }
+
+  // Merge sheet data (shared names) with localStorage (photos, instagram, etc.)
+  function mergeTravelers(sheetData, localData) {
+    const merged = [];
+    const localMap = {};
+    localData.forEach(t => { localMap[t.name.toLowerCase()] = t; });
+    const seen = new Set();
+
+    // Sheet entries first (shared source of truth for who's attending)
+    sheetData.forEach(s => {
+      const key = s.name.toLowerCase();
+      seen.add(key);
+      const local = localMap[key] || {};
+      merged.push({
+        name: s.name,
+        city: local.city || '',
+        connection: local.connection || '',
+        instagram: local.instagram || '',
+        photo: local.photo || '',
+      });
+    });
+
+    // Add any local-only entries (submitted on this device but not yet in sheet)
+    localData.forEach(t => {
+      if (!seen.has(t.name.toLowerCase())) {
+        merged.push(t);
+      }
+    });
+
+    return merged;
+  }
+
+  async function loadAllTravelers() {
+    const sheetData = await fetchSheetTravelers();
+    const localData = getLocalTravelers();
+    return mergeTravelers(sheetData, localData);
   }
 
   function saveTraveler(name, city, connection, photo, instagram) {
@@ -192,12 +267,12 @@ document.addEventListener('DOMContentLoaded', () => {
     return `M${from.x},${from.y} Q${cx},${cy} ${to.x},${to.y}`;
   }
 
-  function renderFlightMap() {
+  function renderFlightMap(travelersOverride) {
     const arcsGroup = document.getElementById('flight-arcs');
     const legend = document.getElementById('map-legend');
     if (!arcsGroup || !legend) return;
 
-    const travelers = getTravelers();
+    const travelers = travelersOverride || getTravelers();
     arcsGroup.innerHTML = '';
 
     if (travelers.length === 0) {
@@ -393,11 +468,11 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  function renderGirlsGrid() {
+  function renderGirlsGrid(travelersOverride) {
     const grid = document.getElementById('girls-grid');
     if (!grid) return;
 
-    const travelers = getTravelers();
+    const travelers = travelersOverride || getTravelers();
 
     if (travelers.length === 0) {
       grid.innerHTML = '<p class="girls-empty">No one here yet — RSVP to join the crew!</p>';
@@ -449,9 +524,15 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // Render on load
+  // Render on load — show local data immediately, then merge with sheet
   renderFlightMap();
   renderGirlsGrid();
+
+  // Fetch shared data from Google Sheet and re-render
+  loadAllTravelers().then(merged => {
+    renderFlightMap(merged);
+    renderGirlsGrid(merged);
+  });
 
   // ---- Photo upload preview ----
   const photoInput = document.getElementById('photo');
