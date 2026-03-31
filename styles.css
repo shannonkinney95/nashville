@@ -930,6 +930,88 @@ img {
   background: rgba(255, 255, 255, 0.08);
 }
 
+/* Date & time inputs */
+.form-group input[type="date"],
+.form-group input[type="time"] {
+  color-scheme: dark;
+}
+
+.form-group input[type="date"]::-webkit-calendar-picker-indicator,
+.form-group input[type="time"]::-webkit-calendar-picker-indicator {
+  filter: invert(0.6);
+  cursor: pointer;
+}
+
+/* Checkbox field */
+.form-group-checkbox {
+  margin-top: 4px;
+  margin-bottom: 24px;
+}
+
+.checkbox-label {
+  display: flex !important;
+  align-items: center;
+  gap: 12px;
+  cursor: pointer;
+  font-size: 15px !important;
+  letter-spacing: 0 !important;
+  text-transform: none !important;
+  color: rgba(255, 255, 255, 0.7) !important;
+}
+
+.checkbox-label input[type="checkbox"] {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.checkbox-custom {
+  flex-shrink: 0;
+  width: 22px;
+  height: 22px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 5px;
+  background: rgba(255, 255, 255, 0.06);
+  transition: all 0.25s;
+  position: relative;
+}
+
+.checkbox-label input[type="checkbox"]:checked + .checkbox-custom {
+  background: var(--gold);
+  border-color: var(--gold);
+}
+
+.checkbox-label input[type="checkbox"]:checked + .checkbox-custom::after {
+  content: '';
+  position: absolute;
+  left: 7px;
+  top: 3px;
+  width: 6px;
+  height: 11px;
+  border: solid var(--bg-dark);
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+}
+
+.checkbox-label input[type="checkbox"]:focus-visible + .checkbox-custom {
+  border-color: var(--gold);
+  box-shadow: 0 0 0 2px rgba(201, 169, 110, 0.3);
+}
+
+.checkbox-text {
+  line-height: 1.4;
+}
+
+.form-hint {
+  font-family: var(--font-body);
+  font-size: 12px;
+  font-weight: 300;
+  color: rgba(255, 255, 255, 0.25);
+  margin-top: 6px;
+  margin-left: 34px;
+}
+
 .form-submit {
   display: inline-block;
   font-family: var(--font-body);

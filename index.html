@@ -449,6 +449,17 @@
           <input type="text" id="name" name="entry.389993025" placeholder="First and last" required />
         </div>
 
+        <div class="form-row">
+          <div class="form-group">
+            <label for="arrival-date">Arrival Date</label>
+            <input type="date" id="arrival-date" name="entry.arrival_date" />
+          </div>
+          <div class="form-group">
+            <label for="arrival-time">Arrival Time</label>
+            <input type="time" id="arrival-time" name="entry.arrival_time" />
+          </div>
+        </div>
+
         <div class="form-group">
           <label for="dietary">Dietary Restrictions</label>
           <input type="text" id="dietary" name="entry.1901398006" placeholder="Allergies, vegetarian, vegan, gluten-free, none, etc." />
@@ -463,6 +474,15 @@
             <label for="snacks">Preferred Snacks</label>
             <input type="text" id="snacks" name="entry.1802815964" placeholder="Chips, fruit, cheese, chocolate, etc." />
           </div>
+        </div>
+
+        <div class="form-group form-group-checkbox">
+          <label class="checkbox-label">
+            <input type="checkbox" id="cowboy-hat" name="entry.cowboy_hat" value="Yes" />
+            <span class="checkbox-custom"></span>
+            <span class="checkbox-text">I'd be into getting an engraved cowboy hat 🤠</span>
+          </label>
+          <p class="form-hint">Totally optional — just gauging interest!</p>
         </div>
 
         <button type="submit" class="form-submit">Submit</button>
