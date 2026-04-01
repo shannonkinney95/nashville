@@ -157,6 +157,76 @@ document.addEventListener('DOMContentLoaded', () => {
     return city;
   }
 
+  // ---- Flickr album photos ----
+  const FLICKR_SET_ID = '72177720332858718';
+  const FLICKR_USER_ID = '194580811@N08';
+
+  /**
+   * Fetch photos from a public Flickr album using the JSONP feed
+   * (no API key required). Returns [{title, url}].
+   * The feed provides _m (240px) URLs; we swap to _w (400px) for cards.
+   */
+  function fetchFlickrPhotos() {
+    return new Promise((resolve) => {
+      const cb = '_flickrCb' + Date.now();
+      window[cb] = (data) => {
+        delete window[cb];
+        script.remove();
+        if (!data || !data.items) { resolve([]); return; }
+        const photos = data.items.map(item => ({
+          title: item.title,
+          url: item.media.m.replace('_m.jpg', '_w.jpg'),
+        }));
+        resolve(photos);
+      };
+      const script = document.createElement('script');
+      script.src = `https://api.flickr.com/services/feeds/photoset.gne?set=${FLICKR_SET_ID}&nsid=${FLICKR_USER_ID}&format=json&jsoncallback=${cb}`;
+      script.onerror = () => { delete window[cb]; resolve([]); };
+      document.head.appendChild(script);
+    });
+  }
+
+  /**
+   * Normalize a name for fuzzy comparison: lowercase, remove non-alpha,
+   * collapse whitespace.
+   */
+  function normalizeName(name) {
+    return name.toLowerCase().replace(/[^a-z ]/g, '').replace(/\s+/g, ' ').trim();
+  }
+
+  /**
+   * Match a sheet name to a Flickr photo title.
+   * Tries exact normalized match first, then checks if either name
+   * starts with or contains the other (handles "Shannon" matching
+   * "Shannon Kinney", or "AnnieL Lovett" matching "Annie Lovett").
+   */
+  function findPhotoForName(sheetName, photos) {
+    const norm = normalizeName(sheetName);
+    const normParts = norm.split(' ');
+
+    for (const photo of photos) {
+      const pNorm = normalizeName(photo.title);
+
+      // Exact match
+      if (norm === pNorm) return photo.url;
+
+      // Sheet name starts with photo title or vice-versa
+      if (norm.startsWith(pNorm) || pNorm.startsWith(norm)) return photo.url;
+
+      // First-name + last-name fuzzy: compare first and last tokens
+      const pParts = pNorm.split(' ');
+      if (normParts.length >= 2 && pParts.length >= 2) {
+        const firstMatch = normParts[0].startsWith(pParts[0]) || pParts[0].startsWith(normParts[0]);
+        const lastMatch = normParts[normParts.length - 1] === pParts[pParts.length - 1];
+        if (firstMatch && lastMatch) return photo.url;
+      }
+
+      // Single-token photo title matches first name in sheet
+      if (pParts.length === 1 && normParts[0].startsWith(pParts[0])) return photo.url;
+    }
+    return null;
+  }
+
   // ---- Google Sheet data ----
   const SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/1WbChy0qZD6sQmIip-aoP7RwtClz8Zs2Ft4PX27z2KMA/gviz/tq?tqx=out:csv';
 
@@ -297,7 +367,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // ---- Girls grid rendering ----
-  function renderGirlsGrid(travelers) {
+  function renderGirlsGrid(travelers, flickrPhotos) {
     const grid = document.getElementById('girls-grid');
     if (!grid) return;
 
@@ -312,9 +382,14 @@ document.addEventListener('DOMContentLoaded', () => {
       const connectionBadge = t.connection
         ? `<span class="girl-connection">${t.connection}</span>`
         : '';
-      const photoEl = t.photo
-        ? `<div class="girl-photo"><img src="${t.photo}" alt="${t.name}" loading="lazy" /></div>`
+
+      // Match photo: prefer Flickr album match by name, fall back to sheet URL
+      const flickrUrl = flickrPhotos ? findPhotoForName(t.name, flickrPhotos) : null;
+      const photoSrc = flickrUrl || t.photo;
+      const photoEl = photoSrc
+        ? `<div class="girl-photo"><img src="${photoSrc}" alt="${t.name}" loading="lazy" /></div>`
         : `<div class="girl-photo-placeholder">${initial}</div>`;
+
       const handle = t.instagram ? t.instagram.replace(/^@?/, '@') : '';
       const igEl = handle
         ? `<a class="girl-instagram" href="https://instagram.com/${handle.replace('@', '')}" target="_blank" rel="noopener">${handle}</a>`
@@ -332,13 +407,13 @@ document.addEventListener('DOMContentLoaded', () => {
     }).join('');
   }
 
-  // ---- Load data from sheet and render ----
+  // ---- Load data from sheet + Flickr album and render ----
   renderFlightMap([]);
-  renderGirlsGrid([]);
+  renderGirlsGrid([], []);
 
-  fetchTravelers().then(travelers => {
+  Promise.all([fetchTravelers(), fetchFlickrPhotos()]).then(([travelers, flickrPhotos]) => {
     renderFlightMap(travelers);
-    renderGirlsGrid(travelers);
+    renderGirlsGrid(travelers, flickrPhotos);
   });
 
   // ---- Spotify widget toggle ----
@@ -376,9 +451,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
       // Re-fetch after a delay so the new entry appears
       setTimeout(async () => {
-        const travelers = await fetchTravelers();
+        const [travelers, flickrPhotos] = await Promise.all([fetchTravelers(), fetchFlickrPhotos()]);
         renderFlightMap(travelers);
-        renderGirlsGrid(travelers);
+        renderGirlsGrid(travelers, flickrPhotos);
       }, 4000);
     });
   }
