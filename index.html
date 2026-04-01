@@ -624,6 +624,21 @@
           </select>
         </div>
 
+        <div class="form-group">
+          <label for="photo">Upload a Photo of Yourself</label>
+          <div class="photo-upload-area" id="photo-upload-area">
+            <input type="file" id="photo" accept="image/*" class="photo-input" />
+            <div class="photo-upload-prompt">
+              <span class="photo-upload-icon">+</span>
+              <span>Tap to choose a photo</span>
+            </div>
+            <div class="photo-preview-wrapper" id="photo-preview-wrapper" style="display:none;">
+              <img id="photo-preview" class="photo-preview" alt="Preview" />
+              <button type="button" class="photo-remove" id="photo-remove">✕</button>
+            </div>
+          </div>
+        </div>
+
         <button type="submit" class="form-submit">Submit</button>
       </form>
 

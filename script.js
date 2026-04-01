@@ -191,6 +191,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const cityIdx = findLast('where');
     const connectionIdx = findLast('connection');
     const instagramIdx = findLast('instagram');
+    const photoIdx = findLast('photo');
 
     return lines.slice(1).map(line => {
       const cols = parseRow(line);
@@ -199,6 +200,7 @@ document.addEventListener('DOMContentLoaded', () => {
         city: cityIdx >= 0 ? cols[cityIdx] || '' : '',
         connection: connectionIdx >= 0 ? cols[connectionIdx] || '' : '',
         instagram: instagramIdx >= 0 ? cols[instagramIdx] || '' : '',
+        photo: photoIdx >= 0 ? cols[photoIdx] || '' : '',
       };
     }).filter(r => r.name);
   }
@@ -310,7 +312,9 @@ document.addEventListener('DOMContentLoaded', () => {
       const connectionBadge = t.connection
         ? `<span class="girl-connection">${t.connection}</span>`
         : '';
-      const photoEl = `<div class="girl-photo-placeholder">${initial}</div>`;
+      const photoEl = t.photo
+        ? `<div class="girl-photo"><img src="${t.photo}" alt="${t.name}" loading="lazy" /></div>`
+        : `<div class="girl-photo-placeholder">${initial}</div>`;
       const handle = t.instagram ? t.instagram.replace(/^@?/, '@') : '';
       const igEl = handle
         ? `<a class="girl-instagram" href="https://instagram.com/${handle.replace('@', '')}" target="_blank" rel="noopener">${handle}</a>`
@@ -347,6 +351,74 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
+  // ---- Photo upload preview ----
+  const photoInput = document.getElementById('photo');
+  const photoPreviewWrapper = document.getElementById('photo-preview-wrapper');
+  const photoPreview = document.getElementById('photo-preview');
+  const photoRemove = document.getElementById('photo-remove');
+  const photoUploadArea = document.getElementById('photo-upload-area');
+
+  if (photoInput) {
+    photoInput.addEventListener('change', () => {
+      const file = photoInput.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = (ev) => {
+          photoPreview.src = ev.target.result;
+          photoPreviewWrapper.style.display = 'block';
+          photoUploadArea.querySelector('.photo-upload-prompt').style.display = 'none';
+        };
+        reader.readAsDataURL(file);
+      }
+    });
+
+    photoRemove.addEventListener('click', () => {
+      photoInput.value = '';
+      photoPreviewWrapper.style.display = 'none';
+      photoUploadArea.querySelector('.photo-upload-prompt').style.display = '';
+    });
+  }
+
+  // ---- ImgBB upload ----
+  const IMGBB_API_KEY = '4973fec31340a5506767c9a87f0a1996';
+
+  function fileToBase64(file) {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result.split(',')[1]);
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    });
+  }
+
+  async function uploadToImgBB(file) {
+    if (!file || IMGBB_API_KEY === 'YOUR_IMGBB_API_KEY') return null;
+    try {
+      const base64 = await fileToBase64(file);
+      const body = new FormData();
+      body.append('key', IMGBB_API_KEY);
+      body.append('image', base64);
+      const resp = await fetch('https://api.imgbb.com/1/upload', { method: 'POST', body });
+      const json = await resp.json();
+      return json.success ? json.data.display_url : null;
+    } catch {
+      return null;
+    }
+  }
+
+  // ---- Write photo URL to Google Sheet via Apps Script ----
+  const PHOTO_SCRIPT_URL = 'YOUR_APPS_SCRIPT_URL';
+
+  async function savePhotoUrl(name, photoUrl) {
+    if (!photoUrl || PHOTO_SCRIPT_URL === 'YOUR_APPS_SCRIPT_URL') return;
+    try {
+      await fetch(PHOTO_SCRIPT_URL, {
+        method: 'POST',
+        body: JSON.stringify({ name, photoUrl }),
+      });
+    } catch { /* best effort */ }
+  }
+
   // ---- RSVP form → Google Forms ----
   const form = document.getElementById('rsvp-form');
   const successEl = document.getElementById('form-success');
@@ -359,27 +431,34 @@ document.addEventListener('DOMContentLoaded', () => {
       btn.disabled = true;
 
       const formData = new FormData(form);
+      const nameValue = formData.get('entry.389993025') || '';
+      const photoFile = photoInput && photoInput.files[0];
+
+      // Submit form data to Google Forms
       const url = 'https://docs.google.com/forms/d/e/1FAIpQLSelatd0CWxQg13PVsEb8vSERQ8WBFs1b1oxV5JEIQLa1XbVHg/formResponse';
 
       try {
-        await fetch(url, {
-          method: 'POST',
-          body: formData,
-          mode: 'no-cors',
-        });
-        form.style.display = 'none';
-        successEl.style.display = 'block';
-      } catch {
-        form.style.display = 'none';
-        successEl.style.display = 'block';
+        await fetch(url, { method: 'POST', body: formData, mode: 'no-cors' });
+      } catch { /* no-cors always throws — that's fine */ }
+
+      // Upload photo to ImgBB, then save URL to sheet
+      if (photoFile) {
+        btn.textContent = 'Uploading photo...';
+        const photoUrl = await uploadToImgBB(photoFile);
+        if (photoUrl) {
+          await savePhotoUrl(nameValue, photoUrl);
+        }
       }
+
+      form.style.display = 'none';
+      successEl.style.display = 'block';
 
       // Re-fetch after a delay so the new entry appears
       setTimeout(async () => {
         const travelers = await fetchTravelers();
         renderFlightMap(travelers);
         renderGirlsGrid(travelers);
-      }, 3000);
+      }, 4000);
     });
   }
 
